@@ -2,8 +2,8 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime
 
-EMAIL = "jonahbot5000@gmail.com"
-PASSWORD = "Eliza123!"
+EMAIL = os.environ.get("EMAIL")
+PASSWORD = os.environ.get("PASSWORD")
 
 RECIPIENT = "Jonahking10@gmail.com"
 
