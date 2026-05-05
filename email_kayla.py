@@ -15,7 +15,6 @@ def get_day():
 
 
 day = get_day()
-workout = get_workout(day)
 
 msg = "Hi Kayla, I think I found a use for chatgpt"
 msg["Subject"] = f"HI Kayla - Test {day}"
