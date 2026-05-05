@@ -40,9 +40,9 @@ def build_workout():
 
     return {
         "warmup": safe_sample(sections["WARMUP"], 3),
-        "strength": safe_sample(sections["STRENGTH"], 3),
+        "strength": safe_sample(sections["STRENGTH"], 4),
         "rotation": safe_sample(sections["ROTATION"], 2),
-        "flexibility": safe_sample(sections["FLEXIBILITY"], 3),
+        "flexibility": safe_sample(sections["FLEXIBILITY"], 4),
     }
 
 
