@@ -1,0 +1,23 @@
+name: Send Daily Workout
+
+on:
+  schedule:
+    - cron: "0 7 * * *"  # 7 AM daily
+  workflow_dispatch:
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+
+      - name: Run script
+        env:
+          EMAIL: ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: python send_email.py
