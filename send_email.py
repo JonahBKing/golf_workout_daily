@@ -65,7 +65,7 @@ html = f"""
     <div style="max-width:600px;margin:0 auto;background:white;padding:20px;">
 
       <h2 style="font-size:22px;margin-bottom:10px;">
-        ⛳ Golf Workout – Day {day}
+        ⛳ Golf Workout
       </h2>
 
       <p style="font-size:14px;color:#666;">
