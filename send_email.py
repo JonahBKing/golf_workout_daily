@@ -8,6 +8,10 @@ PASSWORD = os.environ.get("PASSWORD")
 
 RECIPIENT = "Jonahking10@gmail.com"
 
+print("EMAIL:", EMAIL)
+print("PASSWORD length:", len(PASSWORD) if PASSWORD else None)
+
+
 def get_day():
     start_day = 1
     today = datetime.now().timetuple().tm_yday
