@@ -2,7 +2,7 @@ name: Send Workout
 
 on:
   schedule:
-    - cron: "0 7 * * *"  # 7 AM daily
+    - cron: "0 11 * * *"  
   workflow_dispatch:
 
 jobs:
