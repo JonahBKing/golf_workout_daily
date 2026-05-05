@@ -1,4 +1,4 @@
-name: Send Daily Workout
+name: Send Workout
 
 on:
   schedule:
