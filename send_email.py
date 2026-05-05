@@ -52,7 +52,7 @@ workout = build_workout()
 msg = MIMEMultipart("alternative")
 msg["Subject"] = f"⛳ Golf Workout"
 msg["From"] = EMAIL
-msg["To"] = RECIPIENT2
+msg["To"] = RECIPIENT
 
 
 html = f"""
