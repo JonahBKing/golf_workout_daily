@@ -4,12 +4,12 @@ from email.mime.text import MIMEText
 from datetime import datetime
 
 EMAIL = os.environ.get("EMAIL")
-PASSWORD = os.environ.get("EMAIL_PASSWORD")
+PASSWORD = os.environ.get("PASSWORD")
 
 RECIPIENT = "Jonahking10@gmail.com"
 
 print("EMAIL:", EMAIL)
-print("EMAIL_PASSWORD length:", len(EMAIL_PASSWORD) if EMAIL_PASSWORD else None)
+print("PASSWORD length:", len(PASSWORD) if PASSWORD else None)
 
 
 def get_day():
@@ -34,5 +34,5 @@ msg["From"] = EMAIL
 msg["To"] = RECIPIENT
 
 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-    server.login(EMAIL, EMAIL_PASSWORD)
+    server.login(EMAIL, PASSWORD)
     server.send_message(msg)
