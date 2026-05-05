@@ -9,6 +9,7 @@ EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
 
 RECIPIENT = "Jonahking10@gmail.com"
+RECIPIENT2 = "kaylavonburg@gmail.com"
 
 
 def load_workouts():
@@ -51,7 +52,7 @@ workout = build_workout()
 msg = MIMEMultipart("alternative")
 msg["Subject"] = f"⛳ Golf Workout"
 msg["From"] = EMAIL
-msg["To"] = RECIPIENT
+msg["To"] = RECIPIENT2
 
 
 html = f"""
