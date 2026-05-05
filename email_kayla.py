@@ -16,7 +16,7 @@ def get_day():
 
 day = get_day()
 
-msg = "Hi Kayla, I think I found a use for chatgpt"
+msg = MIMEText("Hi Kayla, I think I found a use for chatgpt")
 msg["Subject"] = f"HI Kayla - Test {day}"
 msg["From"] = EMAIL
 msg["To"] = RECIPIENT
