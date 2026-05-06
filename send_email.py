@@ -146,6 +146,13 @@ html = f"""
         {''.join(f'<li>{x}</li>' for x in workout['flexibility'])}
       </ul>
 
+      <a href="https://your-app.vercel.app/api/done"
+      style="background:#28a745;color:white;
+      padding:12px 20px;border-radius:6px;
+      text-decoration:none;">
+      ✅ Mark Workout Complete
+      </a>
+
     </div>
 
   </body>
