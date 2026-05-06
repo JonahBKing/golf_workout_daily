@@ -4,12 +4,45 @@ import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
+import json
 
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
 
 RECIPIENT = "Jonahking10@gmail.com"
 RECIPIENT2 = "kaylavonburg@gmail.com"
+
+def save_workout(workout):
+    try:
+        with open("history.json")  as f:
+            history = json.load(f)
+    except:
+        history = []
+
+    history.insert(0, workout) # newest
+    history = history[:3] # last 3 days
+
+    with open ("history.json", "w") as f:
+        json.dump(history, f)
+
+def load_history():
+    try:
+        with open("history.json") as f:
+            return json.load(f)
+    except:
+        return []
+
+def get_weight(item, history, category):
+    for i, day in enumerate(history):
+        if item in day.get(category, []):
+            if i == 0:
+                return 0     
+            elif i == 1:
+                return 0.3    
+            elif i == 2:
+                return 0.6   
+    return 1.0  
+
 
 
 def load_workouts():
@@ -32,20 +65,38 @@ def load_workouts():
 
     return sections
 
-def safe_sample(lst, k):
-    return random.sample(lst, min(k, len(lst)))
+def weighted_sample(options, k, history, category):
+    selected = []
+    pool = options[:]
+
+    for _ in range(min(k, len(pool))):
+        weights = [get_weight(item, history, category) for item in pool]
+
+        # remove zero-weight items (yesterday)
+        filtered = [(item, w) for item, w in zip(pool, weights) if w > 0]
+
+        if not filtered:
+            return random.sample(options, min(k, len(options)))
+
+        items, weights = zip(*filtered)
+        choice = random.choices(items, weights=weights, k=1)[0]
+
+        selected.append(choice)
+        pool.remove(choice)
+
+    return selected
 
 
 def build_workout():
     sections = load_workouts()
+    history = load_history()
 
     return {
-        "warmup": safe_sample(sections["WARMUP"], 3),
-        "strength": safe_sample(sections["STRENGTH"], 4),
-        "rotation": safe_sample(sections["ROTATION"], 2),
-        "flexibility": safe_sample(sections["FLEXIBILITY"], 4),
+        "warmup": weighted_sample(sections["WARMUP"], 3, history, "warmup"),
+        "strength": weighted_sample(sections["STRENGTH"], 4, history, "strength"),
+        "rotation": weighted_sample(sections["ROTATION"], 2, history, "rotation"),
+        "flexibility": weighted_sample(sections["FLEXIBILITY"], 4, history, "flexibility"),
     }
-
 
 workout = build_workout()
 
@@ -104,7 +155,9 @@ html = f"""
 msg.attach(MIMEText("Today's golf workout is ready.", "plain"))
 msg.attach(MIMEText(html, "html"))
 
-
 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
     server.login(EMAIL, PASSWORD)
     server.send_message(msg)
+
+
+save_workout(workout)
