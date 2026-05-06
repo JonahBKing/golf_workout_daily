@@ -146,7 +146,7 @@ html = f"""
         {''.join(f'<li>{x}</li>' for x in workout['flexibility'])}
       </ul>
 
-      <a href="https://your-app.vercel.app/api/done"
+      <a href="https://golf-done-api.vercel.app/api/done?id=complete"
       style="background:#28a745;color:white;
       padding:12px 20px;border-radius:6px;
       text-decoration:none;">
