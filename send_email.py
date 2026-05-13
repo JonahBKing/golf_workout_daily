@@ -1,49 +1,53 @@
 import smtplib
 import os
 import random
+import requests
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
-import json
 
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
 
+JSONBIN_BIN_ID = os.environ.get("JSONBIN_BIN_ID")
+JSONBIN_API_KEY = os.environ.get("JSONBIN_API_KEY")
+
 RECIPIENT = "Jonahking10@gmail.com"
-RECIPIENT2 = "kaylavonburg@gmail.com"
 
-def save_workout(workout):
+
+# ----------------------------
+# JSONBIN HELPERS
+# ----------------------------
+
+def load_state():
     try:
-        with open("history.json")  as f:
-            history = json.load(f)
-    except:
-        history = []
+        r = requests.get(
+            f"https://api.jsonbin.io/v3/b/{JSONBIN_BIN_ID}/latest",
+            headers={"X-Master-Key": JSONBIN_API_KEY},
+        )
+        return r.json().get("record", {})
+    except Exception as e:
+        print("load_state error:", e)
+        return {}
 
-    history.insert(0, workout) # newest
-    history = history[:3] # last 3 days
 
-    with open ("history.json", "w") as f:
-        json.dump(history, f)
-
-def load_history():
+def save_state(state):
     try:
-        with open("history.json") as f:
-            return json.load(f)
-    except:
-        return []
-
-def get_weight(item, history, category):
-    for i, day in enumerate(history):
-        if item in day.get(category, []):
-            if i == 0:
-                return 0     
-            elif i == 1:
-                return 0.3    
-            elif i == 2:
-                return 0.6   
-    return 1.0  
+        requests.put(
+            f"https://api.jsonbin.io/v3/b/{JSONBIN_BIN_ID}",
+            headers={
+                "Content-Type": "application/json",
+                "X-Master-Key": JSONBIN_API_KEY,
+            },
+            json=state,
+        )
+    except Exception as e:
+        print("save_state error:", e)
 
 
+# ----------------------------
+# WORKOUT LOADING
+# ----------------------------
 
 def load_workouts():
     sections = {
@@ -65,6 +69,23 @@ def load_workouts():
 
     return sections
 
+
+# ----------------------------
+# WEIGHTING (uses history)
+# ----------------------------
+
+def get_weight(item, history, category):
+    for i, day in enumerate(history):
+        if item in day.get(category, []):
+            if i == 0:
+                return 0
+            elif i == 1:
+                return 0.3
+            elif i == 2:
+                return 0.6
+    return 1.0
+
+
 def weighted_sample(options, k, history, category):
     selected = []
     pool = options[:]
@@ -72,7 +93,6 @@ def weighted_sample(options, k, history, category):
     for _ in range(min(k, len(pool))):
         weights = [get_weight(item, history, category) for item in pool]
 
-        # remove zero-weight items (yesterday)
         filtered = [(item, w) for item, w in zip(pool, weights) if w > 0]
 
         if not filtered:
@@ -87,9 +107,12 @@ def weighted_sample(options, k, history, category):
     return selected
 
 
-def build_workout():
+# ----------------------------
+# BUILD WORKOUT
+# ----------------------------
+
+def build_workout(history):
     sections = load_workouts()
-    history = load_history()
 
     return {
         "warmup": weighted_sample(sections["WARMUP"], 3, history, "warmup"),
@@ -98,60 +121,90 @@ def build_workout():
         "flexibility": weighted_sample(sections["FLEXIBILITY"], 4, history, "flexibility"),
     }
 
-workout = build_workout()
+
+# ----------------------------
+# LOAD STATE
+# ----------------------------
+
+state = load_state()
+
+current = state.get("currentWorkout")
+history = state.get("completedHistory", [])
+
+
+today_id = datetime.now().strftime("%Y-%m-%d")
+
+
+# ----------------------------
+# DECIDE WORKOUT
+# ----------------------------
+
+if current and not current.get("completed"):
+    print("Reusing unfinished workout")
+    workout = current["workout"]
+    workout_id = current["id"]
+
+else:
+    print("Generating new workout")
+
+    workout = build_workout(history)
+    workout_id = today_id
+
+    state["currentWorkout"] = {
+        "id": workout_id,
+        "completed": False,
+        "workout": workout
+    }
+
+    save_state(state)
+
+
+# ----------------------------
+# EMAIL SETUP
+# ----------------------------
 
 msg = MIMEMultipart("alternative")
-msg["Subject"] = f"⛳ Golf Workout"
+msg["Subject"] = "⛳ Golf Workout"
 msg["From"] = EMAIL
 msg["To"] = RECIPIENT
+
+done_link = f"https://golf-done-api.vercel.app/api/done?id={workout_id}"
 
 
 html = f"""
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
+  <body style="font-family:Arial;background:#f5f5f5;padding:20px;">
 
-  <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial, sans-serif;">
+    <div style="max-width:600px;margin:auto;background:white;padding:20px;">
 
-    <div style="max-width:600px;margin:0 auto;background:white;padding:20px;">
+      <h2>⛳ Golf Workout</h2>
 
-      <h2 style="font-size:22px;margin-bottom:10px;">
-        ⛳ Golf Workout
-      </h2>
-
-      <p style="font-size:14px;color:#666;">
-        Built for swing power, mobility, and consistency
+      <p style="color:#666;">
+        Complete today’s session to unlock the next workout.
       </p>
 
-      <hr style="margin:15px 0;">
+      <hr>
 
-      <h3 style="font-size:18px;">🔥 Warm-Up</h3>
-      <ul style="font-size:16px;line-height:1.6;padding-left:20px;">
-        {''.join(f'<li>{x}</li>' for x in workout['warmup'])}
-      </ul>
+      <h3>🔥 Warm-Up</h3>
+      <ul>{''.join(f'<li>{x}</li>' for x in workout['warmup'])}</ul>
 
-      <h3 style="font-size:18px;">💪 Strength</h3>
-      <ul style="font-size:16px;line-height:1.6;padding-left:20px;">
-        {''.join(f'<li>{x}</li>' for x in workout['strength'])}
-      </ul>
+      <h3>💪 Strength</h3>
+      <ul>{''.join(f'<li>{x}</li>' for x in workout['strength'])}</ul>
 
-      <h3 style="font-size:18px;">🔄 Rotation</h3>
-      <ul style="font-size:16px;line-height:1.6;padding-left:20px;">
-        {''.join(f'<li>{x}</li>' for x in workout['rotation'])}
-      </ul>
+      <h3>🔄 Rotation</h3>
+      <ul>{''.join(f'<li>{x}</li>' for x in workout['rotation'])}</ul>
 
-      <h3 style="font-size:18px;">🧘 Flexibility</h3>
-      <ul style="font-size:16px;line-height:1.6;padding-left:20px;">
-        {''.join(f'<li>{x}</li>' for x in workout['flexibility'])}
-      </ul>
+      <h3>🧘 Flexibility</h3>
+      <ul>{''.join(f'<li>{x}</li>' for x in workout['flexibility'])}</ul>
 
-      <a href="https://golf-done-api.vercel.app/api/done?id=complete"
-      style="background:#28a745;color:white;
-      padding:12px 20px;border-radius:6px;
-      text-decoration:none;">
-      ✅ Mark Workout Complete
-      </a>
+      <div style="margin-top:25px;">
+        <a href="{done_link}"
+           style="background:#28a745;color:white;
+           padding:12px 18px;border-radius:6px;
+           text-decoration:none;display:inline-block;">
+          ✅ Mark Workout Complete
+        </a>
+      </div>
 
     </div>
 
@@ -159,12 +212,17 @@ html = f"""
 </html>
 """
 
-msg.attach(MIMEText("Today's golf workout is ready.", "plain"))
+msg.attach(MIMEText("Golf workout ready", "plain"))
 msg.attach(MIMEText(html, "html"))
+
+
+# ----------------------------
+# SEND EMAIL
+# ----------------------------
 
 with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
     server.login(EMAIL, PASSWORD)
     server.send_message(msg)
 
 
-save_workout(workout)
+print("Email sent")
