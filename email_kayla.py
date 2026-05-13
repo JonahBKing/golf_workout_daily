@@ -16,7 +16,7 @@ def get_day():
 
 day = get_day()
 
-msg = MIMEText("Good Morning")
+msg = MIMEText("Good Morning, sorry I forgot this automation was still going")
 msg["Subject"] = f"HI Kayla - Test {day}"
 msg["From"] = EMAIL
 msg["To"] = RECIPIENT
