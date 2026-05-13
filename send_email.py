@@ -164,7 +164,7 @@ else:
 # ----------------------------
 
 msg = MIMEMultipart("alternative")
-msg["Subject"] = "⛳ Golf Workout"
+msg["Subject"] = "Golf Workout"
 msg["From"] = EMAIL
 msg["To"] = RECIPIENT
 
@@ -198,12 +198,9 @@ html = f"""
       <ul>{''.join(f'<li>{x}</li>' for x in workout['flexibility'])}</ul>
 
       <div style="margin-top:25px;">
-        <a href="{done_link}"
-           style="background:#28a745;color:white;
-           padding:12px 18px;border-radius:6px;
-           text-decoration:none;display:inline-block;">
-          ✅ Mark Workout Complete
-        </a>
+      <a href="https://golf-done-api.vercel.app/api/done?id=test">
+      TEST
+      </a>
       </div>
 
     </div>
