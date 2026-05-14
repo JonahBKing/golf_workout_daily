@@ -1,0 +1,31 @@
+name: Complete Workout
+
+on:
+  workflow_dispatch:
+    inputs:
+      workout_id:
+        description: "Workout ID"
+        required: true
+
+jobs:
+  complete:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Mark workout complete
+        env:
+          JSONBIN_BIN_ID: ${{ secrets.JSONBIN_BIN_ID }}
+          JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+          WORKOUT_ID: ${{ github.event.inputs.workout_id }}
+        run: python complete_workout.py
