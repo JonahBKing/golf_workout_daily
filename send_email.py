@@ -168,7 +168,7 @@ msg["Subject"] = "Golf Workout"
 msg["From"] = EMAIL
 msg["To"] = RECIPIENT
 
-done_link =  "https://api.github.com/repos/JonahBKing/golf_workout_daily/actions/workflows/complete_workout.yml/dispatches"
+done_link =  "https://github.com/JonahBKing/golf_workout_daily/issues/1"
 
 
 html = f"""
