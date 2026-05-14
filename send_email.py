@@ -168,7 +168,7 @@ msg["Subject"] = "Golf Workout"
 msg["From"] = EMAIL
 msg["To"] = RECIPIENT
 
-done_link =  f"https://golf-done-api.vercel.app/api/complete?id={workout_id}"
+done_link =  "https://api.github.com/repos/JonahBKing/golf_workout_daily/actions/workflows/complete_workout.yml/dispatches"
 
 
 html = f"""
