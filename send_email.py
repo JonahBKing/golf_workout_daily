@@ -17,6 +17,7 @@ def load_workouts():
         "WARMUP": [],
         "STRENGTH": [],
         "ROTATION": [],
+        "EXPLOSION": [],
         "FLEXIBILITY": []
     }
 
@@ -54,6 +55,11 @@ def build_workout():
         "strength": choose_random(
             sections["STRENGTH"],
             4
+        ),
+
+        "explosion": choose_random(
+            sections["EXPLOSION"],
+            2
         ),
 
         "rotation": choose_random(
@@ -135,6 +141,17 @@ padding-left:20px;
 ">
 {''.join(f'<li>{x}</li>' for x in workout['strength'])}
 </ul>
+
+<h3>💥 Explosion</h3>
+
+<ul style="
+font-size:16px;
+line-height:1.6;
+padding-left:20px;
+">
+{''.join(f'<li>{x}</li>' for x in workout['explosion'])}
+</ul>
+
 
 <h3>🔄 Rotation</h3>
 
