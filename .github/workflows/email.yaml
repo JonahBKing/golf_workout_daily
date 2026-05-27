@@ -1,11 +1,8 @@
 name: Send Workout
 
-permissions:
-  contents: write
-
 on:
   schedule:
-    - cron: "0 9 * * *"  
+    - cron: "0 9 * * *"
   workflow_dispatch:
 
 jobs:
@@ -18,22 +15,11 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v4
-        with: 
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install requests
+        with:
+          python-version: "3.11"
 
       - name: Run script
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: python send_email.py
-     
-      - name: Commit history
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git add history.json
-          git commit -m "Update workout history" || echo "No changes"
-          git push
